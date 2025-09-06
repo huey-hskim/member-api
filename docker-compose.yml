@@ -1,0 +1,34 @@
+# Set password for MySQL root and access user!
+
+services:
+
+  db:
+    image: mysql:8.0.43
+#    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root-pass!@!@
+      MYSQL_USER: member-user
+      MYSQL_PASSWORD: member-pass!@!@
+      MYSQL_DATABASE: member
+    volumes:
+      - db:/var/lib/mysql
+      - ./migrations:/deploy  # 마이그레이션 스크립트 마운트
+
+  api:
+    image: build-member-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: member-user
+      DB_PASSWORD: member-pass!@!@
+      DB_DATABASE: member
+      USE_SWAGGER: "true"           # Swagger UI 활성화
+
+volumes:
+  db:

@@ -1,0 +1,34 @@
+node_modules/
+dist/
+swagger-spec.json
+
+.env
+*.log
+
+.idea/
+.vscode/
+coverage/
+
+*.sqlite
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.DS_Store
+
+.env.*
+*.swp
+*.swo
+*.tgz
+
+# Docker
+*.pid
+
+# 테스트 결과
+junit.xml
+
+# 기타
+*.bak
+*.tmp
+
