@@ -10,7 +10,6 @@ const dbProvider = {
   provide: MYSQL_CONNECTION,
   inject: [ConfigService],
   useFactory: (config: ConfigService) => {
-    console.log(`DB Host: ${config.get<string>('DB_HOST')}`);
     return createPool({
       host: config.get<string>('DB_HOST'),
       port: config.get<number>('DB_PORT') ?? 3306,

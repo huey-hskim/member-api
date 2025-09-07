@@ -20,6 +20,12 @@ docker compose exec db sh -c "cat /deploy/202509/*.sql | mysql -uuser -ppass -Dm
 에러 핸들링 등 세부적인 것들도 만들어 나가야 한다.
 ```
 
+```
+2025-09-07
+기본 DTO를 만들고 기본 콘트롤러에서 사용. 하지만 여전히 제네릭은 안 먹는다.
+
+.env.local을 사용할 수 있다. 예제 .env.example 추가 => 얘는 로딩되지 않는다.
+```
 ---
 
 ## 🚀 시작하기
@@ -45,7 +51,7 @@ npm run start:dev
 ### 3. 컨테이너 빌드
 ```bash
 npm run build:container
-npm run rebuild:container   # --no-cache 옵션으로 빌드
+npm run build:container:nocache   # --no-cache 옵션으로 빌드
 ```
 
 ### 4. Docker로 실행

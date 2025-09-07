@@ -4,6 +4,7 @@ swagger-spec.json
 
 .env
 *.log
+!.env.example
 
 .idea/
 .vscode/
