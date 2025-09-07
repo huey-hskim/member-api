@@ -1,7 +1,7 @@
 // main.ts
 
 import { NestFactory } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import morgan from 'morgan';
@@ -13,13 +13,15 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  await ConfigModule.forRoot({ isGlobal: true });
+  const configService = app.get(ConfigService);
 
   // public 폴더 정적 파일 라우팅
   app.use('/', express.static(join(__dirname, '..', 'public')));
 
+  const use_swagger = configService.get<string>('USE_SWAGGER', 'false');
+
   // 스웨거
-  if (process.env.APP_ENV === 'development' || process.env.USE_SWAGGER === 'true') {
+  if (use_swagger === 'true') {
     const config = new DocumentBuilder()
       .setTitle('Member API')
       .setDescription('회원관리 서비스의 API 문서입니다.')
@@ -44,9 +46,11 @@ async function bootstrap() {
     process.exit(0);
   });
 
-  const port = 3000;
-  await app.listen(port, '0.0.0.0');
-  console.log(`Server is running [${port}]`);
+  // 서버 스타트
+  const port = configService.get<number>('PORT', 3000);
+  const host = configService.get<string>('HOST', '0.0.0.0');
+  await app.listen(port, host);
+  console.log(`Server is running [${host}:${port}]`);
 }
 
 bootstrap().then();

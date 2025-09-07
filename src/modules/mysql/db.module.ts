@@ -1,27 +1,24 @@
 // db.module.ts
 
 import { Module } from '@nestjs/common';
+import { ConfigService } from "@nestjs/config";
 import { createPool } from 'mysql2/promise';
 
 const MYSQL_CONNECTION = 'MYSQL_CONNECTION';
 
-const {
-  DB_HOST: host,
-  DB_USER: user,
-  DB_PASSWORD: password,
-  DB_DATABASE: database,
-  DB_PORT: port,
-} = process.env;
-
 const dbProvider = {
   provide: MYSQL_CONNECTION,
-  useValue: createPool({
-    host,
-    user,
-    password,
-    database,
-    port: Number(port),
-  }),
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    console.log(`DB Host: ${config.get<string>('DB_HOST')}`);
+    return createPool({
+      host: config.get<string>('DB_HOST'),
+      port: config.get<number>('DB_PORT') ?? 3306,
+      user: config.get<string>('DB_USER'),
+      password: config.get<string>('DB_PASSWORD'),
+      database: config.get<string>('DB_DATABASE'),
+    });
+  },
 };
 
 @Module({
