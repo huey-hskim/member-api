@@ -56,7 +56,7 @@ describe('UserService', () => {
   describe('findAll', () => {
     it('should return all users', async () => {
       const mockUsers: UserEntity[] = [
-        { no: 1, name: '홍길동', email: 'test@example.com', created_at: new Date(), updated_at: null },
+        { no: 1, name: '홍길동', email: 'test@example.com' },
       ];
       repo.findAll.mockResolvedValue(mockUsers);
 
@@ -68,7 +68,7 @@ describe('UserService', () => {
 
   describe('findByNo', () => {
     it('should return one user', async () => {
-      const mockUser: UserEntity = { no: 1, name: '홍길동', email: 'test@example.com', created_at: new Date(), updated_at: null };
+      const mockUser: UserEntity = { no: 1, name: '홍길동', email: 'test@example.com' };
       repo.findByNo.mockResolvedValue(mockUser);
 
       const result = await service.findByNo(1);
