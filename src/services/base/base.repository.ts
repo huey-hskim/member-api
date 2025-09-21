@@ -12,7 +12,9 @@ export class BaseRepository<T extends object> {
     is_autoincrement_key: boolean,
     fields: string[],
     fields_ex: string[] = [],
+    fields_ondupl_update: string[] = [],
     fields_soft_deleted: string[] = [],
+    fields_json_convert: string[] = [],
   ) {
     this.helper = new QueryHelper({
       table_name,
@@ -20,7 +22,9 @@ export class BaseRepository<T extends object> {
       is_autoincrement_key,
       fields,
       fields_ex,
+      fields_ondupl_update,
       fields_soft_deleted,
+      fields_json_convert,
     });
   }
 
@@ -30,6 +34,10 @@ export class BaseRepository<T extends object> {
 
   async findByNo(conn: PoolConnection, no: number): Promise<T | null> {
     return this.helper.select(conn, { no }, { firstObjOnly: true }) as Promise<T | null>;
+  }
+
+  async findByUserNo(conn: PoolConnection, user_no: number): Promise<T | null> {
+    return this.helper.select(conn, { user_no }, { firstObjOnly: true }) as Promise<T | null>;
   }
 
   async insert(conn: PoolConnection, data: Partial<T>): Promise<any> {
