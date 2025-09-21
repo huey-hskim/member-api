@@ -7,6 +7,7 @@ export class BaseService<
   R extends {
     findAll(conn: PoolConnection): Promise<T[]>;
     findByNo(conn: PoolConnection, no: number): Promise<T | null>;
+    findByUserNo(conn: PoolConnection, user_no: number): Promise<T | null>;
     insert(conn: PoolConnection, data: Partial<T>): Promise<any>;
     update(conn: PoolConnection, data: Partial<T> & { no: number }): Promise<any>;
     delete(conn: PoolConnection, no: number): Promise<any>;
@@ -30,6 +31,15 @@ export class BaseService<
     const conn = await this.pool.getConnection();
     try {
       return await this.repository.findByNo(conn, no);
+    } finally {
+      conn.release();
+    }
+  }
+
+  async findByUserNo(user_no: number): Promise<T | null> {
+    const conn = await this.pool.getConnection();
+    try {
+      return await this.repository.findByUserNo(conn, user_no);
     } finally {
       conn.release();
     }

@@ -15,10 +15,13 @@ export class BaseDto {
 
 export class BaseResDto {
   @ApiProperty({ example: 200, description: 'result code' })
-  code!: number;
+  code: number = 200;
 
   @ApiProperty({ example: 'success', description: 'result message' })
-  message!: string;
+  message: string = 'success';
+
+  @ApiProperty({ example: null, description: 'result data', required: false })
+  data?: any = null;
 }
 
 export class BaseSelectResDto<T> extends BaseResDto {
