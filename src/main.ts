@@ -22,6 +22,7 @@ async function bootstrap() {
 
   // 스웨거
   if (use_swagger === 'true') {
+    console.log(`Swagger Enabled : -api-doc-s`);
     const config = new DocumentBuilder()
       .setTitle('Member API')
       .setDescription('회원관리 서비스의 API 문서입니다.')
