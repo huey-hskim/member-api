@@ -1,54 +1,51 @@
+// consts.ts
 
-const Config = {
-  SECRET_SESSION: '##ndjt0lEhr7kxdmfRk23$',
-  SECRET_REFRESH: '#0kfdk#kwcnjqh0kdy123$',
-  ADMSECRET_SESSION: '#1#djemals0lfldhs23$',
-  ADMSECRET_REFRESH: '#1#dpgpfkel0jfk6k23$',
-  SESSION_EXPIRES_SEC: 3600      ,    // 1시간. 리프레시 없이 사용가능한 시간.
-  REFRESH_EXPIRES_SEC: 86400 * 63,    // 63일. 2달에 한번 이라도 접속 하면 세션 유지됨.
-  REFRESH_REFRESH_SEC: 86400 * 1 ,    // 1일. 리프레시 토큰 갱신 시간. 유효기간 내 갱신시간 초과 시 갱신. 즉 하루동안은 갱신안함.
+export const Config = {};
+
+export const Settings = {};
+
+export const Defaults = {
+  name : 'Defaults',
 };
 
-const Settings = {
-  TOKEN_KEY: 'access-token',
-};
-
-const Defaults = {
-  name : 'Defaults'
-};
-
-const ConstantsAppUpdate = {
+// App Update Settings
+export const ConstantsAppUpdate = {
   none: 0,
   notify: 1,
   force: 2,
-}
+} as const;
 
+// App Constants
 const ConstantsApp = {
   Update: ConstantsAppUpdate,
 }
 
-const ConstantsAgreementCode = {
+// Agreement Codes
+export const ConstantsAgreementCode = {
   deny: 0,
   agree: 1,
-}
+} as const;
 
-const ConstantsUserStatus = {
+// User Status
+export const ConstantsUserStatus = {
   deleted: 0,
   deletePending:1,
   sleeping: 101,
   paused: 102,
   normal: 200,
-}
+} as const;
 
-const ConstantsUser = {
+// User Constants
+export const ConstantsUser = {
   Status: ConstantsUserStatus,
 }
 
-const ConstantsAdmin = {
+export const ConstantsAdmin = {
   Status: ConstantsUserStatus,
 }
 
-const ConstantsPostboxStatus = {
+// Postbox post Status
+export const ConstantsPostboxStatus = {
   deleted: 0,
   edited: 100,
   test_ready: 200,
@@ -59,13 +56,15 @@ const ConstantsPostboxStatus = {
   live_ing: 401,
   live_error:402,
   live_success: 500,
-}
+} as const;
 
-const ConstantsPostbox = {
+// Postbox Constants
+export const ConstantsPostbox = {
   Status: ConstantsPostboxStatus,
 }
 
-const Constants = {
+// All Constants
+export const Constants = {
   App: ConstantsApp,
   Admin: ConstantsAdmin,
   User: ConstantsUser,
@@ -73,9 +72,9 @@ const Constants = {
   Postbox: ConstantsPostbox,
 }
 
-
+// Error Codes
 //category 0
-const ErrorCodeCommon = {
+export const ErrorCodeCommon = {
   invalidParameter  : 100,
   invalidStatus     : 101,
   unknown           : 999,
@@ -84,9 +83,9 @@ const ErrorCodeCommon = {
     invalidStatus     : '비정상적인 상태입니다.',                      // 수정할 수 없는 상태
     unknown           : '일시적인 오류가 발생했습니다. 다시 시도해 주세요.', // 정의되지 않은 오류
   }
-};
+} as const;
 
-const ErrorCodeDatabase = {
+export const ErrorCodeDatabase = {
   invalidParameter  : 1000,
   idDuplicated      : 1001,
   unknown           : 9999,
@@ -95,10 +94,10 @@ const ErrorCodeDatabase = {
     idDuplicated      : '이미 등록된 정보입니다.',
     unknown           : '일시적인 오류가 발생했습니다. 다시 시도해 주세요.', // 정의되지 않은 오류
   }
-};
+} as const;
 
 //category 10000
-const ErrorCodeAuth = {
+export const ErrorCodeAuth = {
   hashingFailure    : 10100,
   leakedPasswd      : 10101,
   invalidPasswd     : 10201,
@@ -111,10 +110,10 @@ const ErrorCodeAuth = {
     internal          : '이메일이나 비밀번호가 잘못되었습니다. 다시 확인해 주세요.',  // 내부오류 - 토큰 생성 오류 등
     unknown           : '일시적인 오류가 발생했습니다. 다시 시도해 주세요.',        // 정의되지 않은 오류
   }
-};
+} as const;
 
 //category 11000. 앱에 전달되지 않음. 로그인로깅용.
-const ErrorCodeAudit = {
+export const ErrorCodeAudit = {
   invalidParameter  : 11001,
   notFoundUser      : 11002,
   invalidPasswd     : 11003,
@@ -124,10 +123,10 @@ const ErrorCodeAudit = {
   failureTokenIns   : 11007,
   notFoundSession   : 11008,
   unknown           : 11999,
-};
+} as const;
 
 //category 20000
-const ErrorCodeUser = {
+export const ErrorCodeUser = {
   idDuplicated      : 20100,
   idDuplicatedCI    : 20110,
   invalidCI         : 20120,
@@ -156,9 +155,9 @@ const ErrorCodeUser = {
     staleInformation  : '일시적인 오류가 발생했습니다. 다시 시도해 주세요.',    // 이미 다른 정보로 변경된 상태
     unknown           : '일시적인 오류가 발생했습니다. 다시 시도해 주세요.',    // 정의되지 않은 오류
   }
-};
+} as const;
 
-const ErrorCode = {
+export const ErrorCode = {
   success           : 0,
   unknown           : -1,
   Common            : ErrorCodeCommon,
@@ -166,12 +165,4 @@ const ErrorCode = {
   Audit             : ErrorCodeAudit,
   User              : ErrorCodeUser,
   Database          : ErrorCodeDatabase,
-};
-
-module.exports = {
-  Config: Config,
-  Settings: Settings,
-  Defaults: Defaults,
-  ErrorCode: ErrorCode,
-  Constants: Constants,
 };
