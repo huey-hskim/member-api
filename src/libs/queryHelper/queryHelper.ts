@@ -207,10 +207,16 @@ export class QueryHelper {
     fieldQuery = fieldQuery.replace(/^,/, '');
     whereQuery = whereQuery.replace(/^\s*and/, '');
 
+    if (whereQuery?.trim().length) {
+      whereQuery = `WHERE ${whereQuery}`;
+    } else {
+      whereQuery = '';
+    }
+
     const sql = `
         SELECT  ${fieldQuery}
         FROM    ${table_name}
-        WHERE   ${whereQuery}
+        ${whereQuery}
         ${orderQuery}
         ${limitQuery}
     `;
