@@ -1,8 +1,29 @@
 // user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../base/base.repository';
-import { UserEntity, UserInfoEntity, UserShadowEntity, UserSessionEntity } from './user.entity';
+import { UserViewEntity, UserEntity, UserInfoEntity, UserShadowEntity, UserSessionEntity } from './user.entity';
 import { PoolConnection } from "mysql2/promise";
+
+@Injectable()
+export class UserViewRepository extends BaseRepository<UserViewEntity> {
+  constructor() {
+    super(
+      'vw_users',
+      ['user_no'],
+      false,
+      ['id', 'status', 'name', 'email'],
+      ['created_at', 'updated_at'],
+      [], // on duplicate update field
+      [], // soft delete field
+      [], // json convert field
+    );
+  }
+
+  // 필요시 커스텀 쿼리 추가 가능
+  async findByEmail(conn: PoolConnection, email: string): Promise<UserViewEntity | null> {
+    return this.helper.select(conn, { email }, { firstObjOnly: true }) as Promise<UserViewEntity | null>;
+  }
+}
 
 @Injectable() // Provider 등록 가능
 export class UserRepository extends BaseRepository<UserEntity> {

@@ -48,3 +48,17 @@ CREATE TABLE IF NOT EXISTS user_sessions
     INDEX ix_user_sessions_hash (hash, user_no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+# drop view vw_users;
+CREATE VIEW vw_users AS
+    SELECT  u.no as user_no,
+            u.id,
+            u.status,
+            ui.name,
+            ui.email,
+            u.created_at as created_at,
+            u.updated_at as updated_at
+    FROM    users u
+            LEFT JOIN user_infos ui on u.no = ui.user_no
+;
+# select * from vw_users;
+## end of vw_users

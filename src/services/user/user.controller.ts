@@ -4,12 +4,12 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { ApiOperation, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { BaseController } from '../base/base.controller';
 import { CreateUserDto } from './user.dto';
-import { UserEntity } from './user.entity';
+import { UserViewEntity } from './user.entity';
 import { UserService } from './user.service';
 
 @ApiTags('Users') // Swagger Tag
 @Controller('users')
-export class UserController extends BaseController<UserEntity, UserService> {
+export class UserController extends BaseController<UserViewEntity, UserService> {
   constructor(private readonly userService: UserService) {
     super(userService);
   }
