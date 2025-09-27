@@ -7,12 +7,19 @@ import { UserViewRepository } from './user.repository';
 import { UserViewEntity } from './user.entity';
 
 @Injectable()
-export class ProfileService extends BaseService<UserViewEntity, UserViewRepository> {
+export class ProfileService {
   constructor(
-    @Inject('MYSQL_CONNECTION') pool: Pool,
+    @Inject('MYSQL_CONNECTION') private readonly pool: Pool,
     private readonly userViewRepository: UserViewRepository,
-  ) {
-    super(pool, userViewRepository);
-  }
+  ) {}
 
+
+  async findByUserNo(user_no: number) {
+    const conn = await this.pool.getConnection();
+    try {
+      return await this.userViewRepository.findByUserNo(conn, user_no);
+    } finally {
+      conn.release();
+    }
+  }
 }
