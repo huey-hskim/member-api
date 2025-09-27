@@ -1,6 +1,7 @@
 // base.controller.ts
 
-import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BaseSelectResDto, BaseInsertResDto, BaseUpdateResDto, BaseDeleteResDto } from './base.dto';
 
@@ -16,6 +17,7 @@ export abstract class BaseController<
 > {
   protected constructor(protected readonly service: S) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   @ApiOperation({ summary: '전체 조회' })
   @ApiResponse({ status: 200, description: '성공', type: BaseSelectResDto<T> })
@@ -23,6 +25,7 @@ export abstract class BaseController<
     return this.service.findAll();
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':no')
   @ApiOperation({ summary: '단일 조회' })
   @ApiResponse({ status: 200, description: '성공', type: BaseSelectResDto<T> })
@@ -30,6 +33,7 @@ export abstract class BaseController<
     return this.service.findByNo(no);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   @ApiOperation({ summary: '생성' })
   @ApiResponse({ status: 200, description: '생성 성공', type: BaseInsertResDto })
@@ -37,6 +41,7 @@ export abstract class BaseController<
     return this.service.insert(data);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put(':no')
   @ApiOperation({ summary: '수정' })
   @ApiResponse({ status: 200, description: '수정 성공', type: BaseUpdateResDto })
@@ -44,6 +49,7 @@ export abstract class BaseController<
     return this.service.update({ ...data, no } as Partial<T> & { no: number });
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':no')
   @ApiOperation({ summary: '삭제' })
   @ApiResponse({ status: 200, description: '삭제 성공', type: BaseDeleteResDto })

@@ -8,8 +8,8 @@ import { PayloadInAccessToken, PayloadInRefreshToken } from './auth.entity';
 
 const PEPPER                  = process.env.PEPPER || 'skfktkfkdgk^p';
 
-const ACCESS_TOKEN_SECRET     = process.env.ACCESS_TOKEN_SECRET || 'sn7nsisjs!!';
-const REFRESH_TOKEN_SECRET    = process.env.REFRESH_TOKEN_SECRET || '#ndjtdp^mdlsmsrh';
+export const ACCESS_TOKEN_SECRET     = process.env.ACCESS_TOKEN_SECRET || 'sn7nsisjs!!';
+export const REFRESH_TOKEN_SECRET    = process.env.REFRESH_TOKEN_SECRET || '#ndjtdp^mdlsmsrh';
 
 export const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || '1h'; // 1 hour
 export const REFRESH_TOKEN_TTL= process.env.REFRESH_TOKEN_TTL || '63d'; // 60 * 60 * 24 * 63; // 63 days
