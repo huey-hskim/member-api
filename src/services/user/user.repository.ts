@@ -111,4 +111,9 @@ export class UserSessionRepository extends BaseRepository<UserSessionEntity> {
       firstObjOnly: true,
     }) as Promise<UserSessionEntity | null>;
   }
+
+  async deleteByHash(conn: PoolConnection, user_no: number, hash: string): Promise<any> {
+    return this.helper.delete(conn, { user_no, hash });
+  }
+
 }

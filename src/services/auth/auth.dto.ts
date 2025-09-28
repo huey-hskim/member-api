@@ -29,4 +29,14 @@ export class RefreshTokenDto {
   refresh_token!: string;
 }
 
-export class RefreshTokenResDto extends LoginResDto { }
+export class RefreshTokenResDto extends LoginResDto {}
+
+export class LogoutResDto extends BaseResDto {}
+
+export class PasswdChangeDto {
+  @ApiProperty({ example: 'old', description: '기존 비밀번호' })
+  old_p_w!: string;
+
+  @ApiProperty({ example: 'new', description: '새 비밀번호' })
+  new_p_w!: string;
+}

@@ -1,8 +1,9 @@
 // auth.controller.ts
-import {Body, Controller, Post, UnauthorizedException} from '@nestjs/common';
+import { Request, Body, Controller, Post, UseGuards, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResDto, RefreshTokenDto, RefreshTokenResDto } from './auth.dto';
+import { LoginDto, LoginResDto, RefreshTokenDto, RefreshTokenResDto, LogoutResDto } from './auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,4 +39,26 @@ export class AuthController {
     };
   }
 
-}
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt-logout'))
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiResponse({ status: 200, description: '로그아웃 성공', type: LogoutResDto })
+  async logout(@Request() req: any): Promise<LogoutResDto> {
+    const {
+      user_no,
+      hash,
+    } = req.user || {};
+
+    if (!user_no || !hash) {
+      throw new BadRequestException('Token is not valid');
+    }
+
+    await this.authService.logout({ user_no, hash }); // 결과와 상관없이 로그아웃
+
+    return {
+      code: 200,
+      message: 'success',
+    };
+  }
+
+} // end of AuthController

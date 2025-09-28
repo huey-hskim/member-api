@@ -150,4 +150,15 @@ export class AuthService {
     }
   }
 
+  async logout(user: { user_no: number; hash: string }) {
+    const conn = await this.pool.getConnection();
+
+    try {
+      // 1. 세션 삭제
+      await this.userSessionRepo.deleteByHash(conn, user.user_no, user.hash);
+    } finally {
+      conn.release();
+    }
+  }
+
 }
