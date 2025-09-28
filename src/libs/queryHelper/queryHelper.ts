@@ -447,11 +447,13 @@ export class QueryHelper {
       whereCustomQuery,
       whereCustomQueryOnly,
       whereCustomParams,
+      allowMultipleAffect,
     }: {
       updateCustomObj?: Record<string, any>;
       whereCustomQuery?: string;
       whereCustomQueryOnly?: boolean;
       whereCustomParams?: any[];
+      allowMultipleAffect?: boolean;
     } = {}
   ): Promise<QueryResult> {
     let output: QueryResult = {
@@ -482,14 +484,14 @@ export class QueryHelper {
       }
     }
 
-    if (!whereQuery) {
+    whereQuery = whereQuery.replace(/^\s*and/, '');
+
+    if (!whereQuery.trim().length) {
       output.errCode = ErrorCode.Common.invalidParameter;
       output.message = ErrorCode.Common._message.invalidParameter;
 
       return output;
     }
-
-    whereQuery = whereQuery.replace(/^\s*and/, '');
 
     let updateCustomQuery = '';
     for (let [k, v] of Object.entries(updateCustomObj || {})) {
@@ -522,7 +524,12 @@ export class QueryHelper {
       }
 
       const [result] = await conn.query<ResultSetHeader>(sql, params);
-      if (!result || result.affectedRows !== 1) {
+      if (!result || !(
+          (allowMultipleAffect && result.affectedRows > 0)    // 여러행 허용시 1 이상
+          ||
+          (!allowMultipleAffect && result.affectedRows === 1) // 단일행만 허용시 1
+        )
+      ) {
         return output;
       }
 
