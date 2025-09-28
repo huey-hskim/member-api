@@ -7,22 +7,32 @@ import * as bcrypt from 'bcrypt';
 
 import { ErrorCode } from '../../constants/consts';
 
-import { UserShadowRepository, UserViewRepository, UserSessionRepository } from './user.repository';
+import { UserViewRepository, UserInfoRepository, UserShadowRepository, UserSessionRepository } from './user.repository';
+import { UserInfoEntity } from './user.entity';
 
 @Injectable()
 export class ProfileService {
   constructor(
     @Inject('MYSQL_CONNECTION') private readonly pool: Pool,
     private readonly userViewRepository: UserViewRepository,
+    private readonly userInfoRepository: UserInfoRepository,
     private readonly userShadowRepository: UserShadowRepository,
     private readonly userSessionRepository: UserSessionRepository,
   ) {}
-
 
   async findByUserNo(user_no: number) {
     const conn = await this.pool.getConnection();
     try {
       return await this.userViewRepository.findByUserNo(conn, user_no);
+    } finally {
+      conn.release();
+    }
+  }
+
+  async update(data: Partial<UserInfoEntity>) {
+    const conn = await this.pool.getConnection();
+    try {
+      return this.userInfoRepository.update(conn, data);
     } finally {
       conn.release();
     }
@@ -68,4 +78,4 @@ export class ProfileService {
     }
   }
 
-}
+} // end of ProfileService

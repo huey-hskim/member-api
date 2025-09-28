@@ -6,14 +6,14 @@ import {
   Body,
   Get,
   Put,
+  Patch,
   UseGuards,
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiCreatedResponse, ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
-import { BaseController } from '../base/base.controller';
-import { UserViewEntity } from './user.entity';
+import { UserInfoEntity } from './user.entity';
 import { ProfileService } from './profile.service';
 import { PasswdChangeDto } from '../auth/auth.dto';
 import { BaseResDto } from '../base/base.dto';
@@ -43,6 +43,30 @@ export class ProfileController {
     return this.profileService.findByUserNo(req.user.user_no);
   }
 
+  @Patch()
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '프로필 수정' })
+  @ApiResponse({ status: 200, description: '프로필 수정 성공' })
+  async update(@Request() req: any, @Body() body: Partial<UserInfoEntity>): Promise<BaseResDto> {
+    const {
+      user_no,
+    } = req.user || {};
+
+    if (!user_no) {
+      throw new UnauthorizedException('No user_no in token');
+    }
+
+    const result = await this.profileService.update({ ...body, user_no });
+    if (result?.errCode !== ErrorCode.success) {
+      throw new BadRequestException(result?.message || 'Profile update failed');
+    }
+
+    return {
+      code: 200,
+      message: 'success',
+    };
+  }
 
   @Put('passwd')
   @UseGuards(AuthGuard('jwt'))
@@ -72,7 +96,6 @@ export class ProfileController {
       code: 200,
       message: 'success',
     };
-
   }
 
 }
