@@ -44,7 +44,7 @@ export class BaseRepository<T extends object> {
     return this.helper.insert(conn, data);
   }
 
-  async update(conn: PoolConnection, data: Partial<T> & { no: number }): Promise<any> {
+  async update(conn: PoolConnection, data: Partial<T>): Promise<any> {
     return this.helper.update(conn, data);
   }
 

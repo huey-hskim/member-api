@@ -116,4 +116,7 @@ export class UserSessionRepository extends BaseRepository<UserSessionEntity> {
     return this.helper.delete(conn, { user_no, hash });
   }
 
+  async deleteByUserNo(conn: PoolConnection, user_no: number): Promise<any> {
+    return this.helper.delete(conn, { user_no }, { allowMultipleAffect: true } );
+  }
 }
