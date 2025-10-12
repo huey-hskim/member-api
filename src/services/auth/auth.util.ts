@@ -1,12 +1,12 @@
 // auth.util.ts
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { createHash, randomBytes } from 'crypto';
 
 import { PayloadInAccessToken, PayloadInRefreshToken } from './auth.entity';
 
-const PEPPER                  = process.env.PEPPER || 'skfktkfkdgk^p';
+export const PEPPER                  = process.env.PEPPER || 'skfktkfkdgk^p';
 
 export const ACCESS_TOKEN_SECRET     = process.env.ACCESS_TOKEN_SECRET || 'sn7nsisjs!!';
 export const REFRESH_TOKEN_SECRET    = process.env.REFRESH_TOKEN_SECRET || '#ndjtdp^mdlsmsrh';
@@ -20,6 +20,18 @@ export class AuthUtil {
     private readonly jwtService: JwtService,
   ) {}
 
+  makeRandomPasswd (len: number = 9, prefix: string = 'Mi6', encoding: BufferEncoding = 'base64url'): string {
+    len = Math.min(len,20);
+    return prefix+randomBytes(20).toString(encoding).substring(0, len);
+  }
+
+  makeHash4Verify (str: string): string  {
+    return createHash('sha256')
+      .update(str)
+      .update(PEPPER)
+      .digest('hex');
+  }
+
   makeHash (str: string): string  {
     return createHash('sha256')
       .update(str)
@@ -28,10 +40,11 @@ export class AuthUtil {
       .digest('hex');
   }
 
-  makeAccessToken(payload: Partial<{ user_no: string | number, hash: string, ttl: string | number }>): string | null {
+  makeAccessToken(payload: Partial<{ user_no: string | number, id: string, hash: string, ttl: string | number }>): string | null {
     let {
       user_no,
       hash,
+      id,
       ttl,
     } = payload;
 
@@ -42,6 +55,7 @@ export class AuthUtil {
     const data = {
       user_no,
       hash,
+      id,
     };
 
     const secret = ACCESS_TOKEN_SECRET;
@@ -78,10 +92,9 @@ export class AuthUtil {
 
   verifyAccessToken(token: string): PayloadInAccessToken | null {
     try {
-      const payload = this.jwtService.verify(token, {
+      return this.jwtService.verify(token, {
         secret: ACCESS_TOKEN_SECRET,
-      });
-      return payload;
+      }) as PayloadInAccessToken;
     } catch (err) {
       return null;
     }
@@ -89,10 +102,9 @@ export class AuthUtil {
 
   verifyRefreshToken(token: string): PayloadInRefreshToken | null {
     try {
-      const payload = this.jwtService.verify(token, {
+      return this.jwtService.verify(token, {
         secret: REFRESH_TOKEN_SECRET,
-      });
-      return payload;
+      }) as PayloadInRefreshToken;
     } catch (err) {
       return null;
     }

@@ -50,6 +50,45 @@ export class QueryHelper {
     this.fields_json_convert = fields_json_convert;
   }
 
+  // TODO: JsonHelper로 분리할지, 나중에 어딘가에서 사용하게 된다면 생각해 보기로..
+  _any_to_json_string(v: any, isCsvString: boolean = false): string | undefined | null {
+    if (v === undefined || v === null) {
+      return v;
+    }
+
+    if (typeof v === 'string') {
+      try {
+        // 이미 JSON 형태라면 그대로 사용
+        JSON.parse(v);
+        return v;
+      } catch (_) {
+        // csv, array 모두 같은 값으로 변환되므로, 역변환을 할 수 없다. 그러므로 csv 형태의 변환을 기본적으로 지원하지 않는다.
+        if (isCsvString) {
+          // JSON 파싱 실패시, 콤마로 구분된 문자열을 JSON 배열로 변환
+          return JSON.stringify(v.split(','));
+        } else {
+          // 그냥 문자열이라면 그대로 변환
+          return JSON.stringify(v);
+        }
+      }
+    }
+
+    return JSON.stringify(v);
+  }
+
+  _json_string_to_any(v: any, toCsvString: boolean = false): any {
+    try {
+      const parsed = JSON.parse(v);
+      if (toCsvString && Array.isArray(parsed)) {
+        return parsed.join(',');
+      }
+      return parsed;
+    } catch (_) {
+      // JSON 파싱 실패시, 원래 값 그대로 반환
+      return v;
+    }
+  }
+
   /** COUNT */
   async total_cnt(
     conn: PoolConnection,
@@ -233,15 +272,11 @@ export class QueryHelper {
       if (fieldQuery.includes(j)) {
         if (Array.isArray(output)) {
           output = output.map((i) => {
-            try {
-              i[j] = JSON.parse(i[j]).join(',');
-            } catch {}
+            i[j] = this._json_string_to_any(i[j] /*, true <= true 로 하면 csv로 변환한다. 다른 옵션이 필요함. */);
             return i;
           });
         } else {
-          try {
-            output[j] = JSON.parse(output[j]).join(',');
-          } catch {}
+          output[j] = this._json_string_to_any(output[j]);
         }
       }
     }
@@ -264,21 +299,19 @@ export class QueryHelper {
     let onDuplUpdateQuery = '';
 
     for (const f of this.fields_json_convert) {
-      if (objValues[f] !== undefined && typeof objValues[f] === 'string') {
-        objValues[f] = JSON.stringify(objValues[f].split(','));
-      }
+      objValues[f] = this._any_to_json_string(objValues[f]);
     }
 
     for (const l of [this.keys, this.fields, this.fields_ex]) {
       for (const i of l) {
         if (objValues[i] !== undefined) {
           // ! 직접 입력 값 허용할지.. 나중에 필요하면 넣기.
-          // if (typeof objValues[i] === 'string' && objValues[i].charAt(0) === '!') {
-          //   valueQuery += `, ${objValues[i].substring(1)}`;
-          // } else {
-          // }
+          if (typeof objValues[i] === 'string' && objValues[i].charAt(0) === '!') {
+            valueQuery += `, ${objValues[i].substring(1)}`;
+          } else {
+            valueQuery += ', ?';
+          }
           fieldQuery += `, ${i}`;
-          valueQuery += ', ?';
           params.push(objValues[i]);
         }
       }
@@ -374,9 +407,7 @@ export class QueryHelper {
     let whereQuery = '';
 
     for (const f of this.fields_json_convert) {
-      if (objValues[f] !== undefined && typeof objValues[f] === 'string') {
-        objValues[f] = JSON.stringify(objValues[f].split(','));
-      }
+      objValues[f] = this._any_to_json_string(objValues[f]);
     }
 
     for (const l of [this.fields, this.fields_ex]) {

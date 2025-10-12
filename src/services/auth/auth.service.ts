@@ -19,13 +19,17 @@ export class AuthService {
   ) {}
 
   async makeToken(conn: PoolConnection, user: { no: number; id?: string }, session_no: number = 0) {
-    const user_no = user.no;
+    const {
+      no: user_no,
+      id,
+    } = user;
 
     const hash = this.authUtil.makeHash(`|${user_no}|${user.id}|${(new Date()).getTime()}|`); // 변경 불가능한 값과 현재 시간을 조합
 
     const access_token = this.authUtil.makeAccessToken({
       user_no,
       hash,
+      id,
     });
 
     const refresh_token = this.authUtil.makeRefreshToken({
@@ -82,7 +86,7 @@ export class AuthService {
       const {
         access_token,
         refresh_token,
-      } = await this.makeToken(conn, { no: user.no });
+      } = await this.makeToken(conn, { no: user.no, id: user.id });
 
       return {
         access_token,

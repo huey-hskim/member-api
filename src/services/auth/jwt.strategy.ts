@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { ACCESS_TOKEN_SECRET } from './auth.util';
+import { PayloadInAccessToken } from './auth.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -15,18 +16,19 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: PayloadInAccessToken) {
     // payload = { user_no: users.no, hash: sessions.hash }
     const {
       user_no,
       hash,
+      id,
     } = payload;
 
     if (!user_no || !hash) {
       return null;
     }
 
-    return { user_no, hash };
+    return { user_no, hash, id };
   }
 }
 
@@ -40,17 +42,18 @@ export class JwtLogoutStrategy extends PassportStrategy(Strategy, 'jwt-logout') 
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: PayloadInAccessToken) {
     // payload = { user_no: users.no, hash: sessions.hash }
     const {
       user_no,
       hash,
+      id,
     } = payload;
 
     if (!user_no || !hash) {
       return null;
     }
 
-    return { user_no, hash };
+    return { user_no, hash, id };
   }
 }

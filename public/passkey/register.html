@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Passkey Register (init → complete)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; padding: 20px; }
+        input, button { font-size: 16px; padding: 8px; margin: 6px 0; }
+        pre { background:#f6f6f6; padding:10px; max-height:200px; overflow:auto;}
+    </style>
+</head>
+<body>
+<h2>Passkey Register (After sign-up flow)</h2>
+
+<!--<p>Enter an <strong>id (email)</strong> to create an account + register passkey</p>-->
+<p>Enter an <strong>access token</strong> to register passkey</p>
+
+<!--label>
+    id (email):<br />
+    <input id="id" placeholder="user@example.com" />
+</label>
+<br />
+<label>
+    display name:<br />
+    <input id="displayName" placeholder="User Name" />
+</label>
+<br /-->
+<label>
+    access token:<br />
+    <input id="accessToken" placeholder="Access Token" />
+</label>
+<br />
+<button id="startBtn">Start Register (init)</button>
+<button id="completeBtn" disabled>Complete Register (verify)</button>
+
+<h3>Logs</h3>
+<pre id="log"></pre>
+
+<!-- simplewebauthn/browser UMD via unpkg -->
+<!--<script src="https://unpkg.com/@simplewebauthn/browser@latest/dist/simplewebauthn-browser.min.js"></script>-->
+<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+<script>
+  const logEl = document.getElementById('log');
+  function log(...args) {
+    console.log(...args);
+    logEl.textContent += args.map(a => {
+      try { return typeof a === 'string' ? a : JSON.stringify(a, null, 2); }
+      catch { return String(a); }
+    }).join(' ') + '\n\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  const { startRegistration } = window.SimpleWebAuthnBrowser;
+
+  let currentOptions = null;
+  let lastResponse = null; // attestation response to send to server
+  let lastNonce = null; // server nonce for current registration
+
+  document.getElementById('startBtn').addEventListener('click', async () => {
+    // const id = document.getElementById('id').value.trim();
+    // const displayName = document.getElementById('displayName').value.trim() || id;
+    // if (!id) { alert('enter id'); return; }
+
+    const accessToken = document.getElementById('accessToken').value.trim();
+
+    try {
+      log('Requesting registration options from server for id=', accessToken);
+      const resp = await fetch('/auth/passkey/register/options', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+        },
+        // body: JSON.stringify({ id, displayName }),
+      });
+      if (!resp.ok) throw new Error('server returned ' + resp.status);
+      const { data: { options, nonce } } = await resp.json() || { data: {} };
+      log('Got options:', options);
+      log('nonce:', nonce);
+      lastNonce = nonce; // save nonce for this registration
+
+      // call browser API via simplewebauthn helper
+      currentOptions = options;
+      const credential = await startRegistration(options);
+      log('navigator.credentials.create returned credential:', credential);
+      lastResponse = credential;
+      document.getElementById('completeBtn').disabled = false;
+    } catch (err) {
+      log('ERROR during start:', err.message || err);
+    }
+  });
+
+  document.getElementById('completeBtn').addEventListener('click', async () => {
+    // const id = document.getElementById('id').value.trim();
+    if (!lastResponse) { alert('No credential to verify. run start first.'); return; }
+
+    const accessToken = document.getElementById('accessToken').value.trim();
+
+    try {
+      log('Sending attestation to server for verification...');
+      const resp = await fetch('/auth/passkey/register/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+        },
+        body: JSON.stringify({ nonce: lastNonce, attestationResponse: lastResponse }),
+      });
+      const data = await resp.json();
+      log('Server verify response:', data);
+      if (!resp.ok) {
+        alert('Register verify failed: ' + (data.message || resp.status));
+      } else {
+        alert('Register OK');
+      }
+    } catch (err) {
+      log('ERROR during complete:', err.message || err);
+    }
+  });
+</script>
+</body>
+</html>

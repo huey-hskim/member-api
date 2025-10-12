@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Passkey Login</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; padding: 20px; }
+        input, button { font-size: 16px; padding: 8px; margin: 6px 0; }
+        pre { background:#f6f6f6; padding:10px; max-height:200px; overflow:auto;}
+    </style>
+</head>
+<body>
+<h2>Passkey Login</h2>
+
+<label>
+    id (email):<br />
+    <input id="id" placeholder="user@example.com" />
+</label>
+<br />
+<button id="startBtn">Get Login Options</button>
+<button id="authBtn" disabled>Authenticate (complete)</button>
+
+<h3>Logs</h3>
+<pre id="log"></pre>
+
+<!--<script src="https://unpkg.com/@simplewebauthn/browser@latest/dist/simplewebauthn-browser.min.js"></script>-->
+<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+<script>
+  const logEl = document.getElementById('log');
+  function log(...args) {
+    console.log(...args);
+    logEl.textContent += args.map(a => {
+      try { return typeof a === 'string' ? a : JSON.stringify(a, null, 2); }
+      catch { return String(a); }
+    }).join(' ') + '\n\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  const { startAuthentication } = window.SimpleWebAuthnBrowser;
+  let loginOptions = null;
+  let lastAssertion = null;
+  let lastNonce = null;
+
+  document.getElementById('startBtn').addEventListener('click', async () => {
+    const id = document.getElementById('id').value.trim();
+    if (!id) { alert('enter id'); return; }
+    try {
+      log('Requesting login options for id:', id);
+      const resp = await fetch('/auth/passkey/login/options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (!resp.ok) throw new Error('server returned ' + resp.status);
+      const { data: { options, nonce } } = await resp.json() || { data: {} };
+      log('Got options:', options);
+      loginOptions = options;
+      lastNonce = nonce;
+
+      const assertion = await startAuthentication(options);
+      log('navigator.credentials.get returned assertion:', assertion);
+      lastAssertion = assertion;
+      document.getElementById('authBtn').disabled = false;
+    } catch (err) {
+      log('ERROR during start auth:', err.message || err);
+    }
+  });
+
+  document.getElementById('authBtn').addEventListener('click', async () => {
+    const id = document.getElementById('id').value.trim();
+    if (!lastAssertion) { alert('No assertion. run get options first.'); return; }
+    try {
+      log('Sending assertion to server for verify...');
+      const resp = await fetch('/auth/passkey/login/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, nonce: lastNonce, assertionResponse: lastAssertion }),
+      });
+      const data = await resp.json();
+      log('Server verify result:', data);
+      if (!resp.ok) {
+        alert('Login verify failed');
+      } else {
+        alert('Login OK — server returned token/info (check logs)');
+      }
+    } catch (err) {
+      log('ERROR during auth verify:', err.message || err);
+    }
+  });
+</script>
+</body>
+</html>

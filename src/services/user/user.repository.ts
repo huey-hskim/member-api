@@ -2,7 +2,8 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../base/base.repository';
 import { UserViewEntity, UserEntity, UserInfoEntity, UserShadowEntity, UserSessionEntity } from './user.entity';
-import { PoolConnection } from "mysql2/promise";
+import { PoolConnection } from 'mysql2/promise';
+import { UserPasskey } from '../auth/auth.entity';
 
 @Injectable()
 export class UserViewRepository extends BaseRepository<UserViewEntity> {
@@ -118,5 +119,70 @@ export class UserSessionRepository extends BaseRepository<UserSessionEntity> {
 
   async deleteByUserNo(conn: PoolConnection, user_no: number): Promise<any> {
     return this.helper.delete(conn, { user_no }, { allowMultipleAffect: true } );
+  }
+}
+
+@Injectable()
+export class UserPasskeyRepository extends BaseRepository<any> {
+  constructor() {
+    super(
+      'user_passkeys',
+      ['no'],
+      true,
+      ['user_no', 'credential_id', 'transports', 'fmt', 'aaguid'],
+      ['public_key', 'sign_count', 'created_at', 'updated_at'],
+      ['sign_count', 'updated_at'], // on duplicate update field
+      [], // soft delete field
+      ['transports'], // json convert field
+    );
+  }
+
+  async findAllByUserNo(conn: PoolConnection, user_no: number, fieldsCustom: string[] = []): Promise<UserPasskey[]> {
+    return this.helper.select(conn, { user_no }, { fieldsCustom });
+  }
+
+  async findByCredentialId(conn: PoolConnection, credential_id: string, user_no: number): Promise<UserPasskey | null> {
+    return this.helper.select(conn, { credential_id, user_no }, { firstObjOnly: true });
+  }
+
+  async findAllByUserId(conn: PoolConnection, id: string, credential_id: string | undefined = undefined): Promise<UserPasskey[]> {
+    const whereCustomQuery = `and (user_no = (select no from users where id = ? and deleted_at is null and status = 200))`;
+    const whereCustomParams = [`${id}`];
+    const results = await this.helper.select(conn, { credential_id }, { whereCustomQuery, whereCustomParams });
+
+    return results as UserPasskey[];
+  }
+}
+
+@Injectable()
+export class UserPasskeyChallengeRepository extends BaseRepository<any> {
+  constructor() {
+    super(
+      'user_passkey_challenges',
+      ['no'],
+      true,
+      ['user_no', 'challenge', 'hash'],
+      ['created_at', 'expires_at'],
+      [], // on duplicate update field
+      [], // soft delete field
+      [], // json convert field
+    );
+  }
+
+  async findByHash(conn: PoolConnection, user_no: number, hash: string): Promise<any | null> {
+    // 만료된 챌린지는 조회하지 않음
+    const whereCustomQuery = 'and expires_at > now()';
+    const whereCustomParams: any[] = [];
+
+    return this.helper.select(conn, {
+      user_no,
+      hash,
+    }, {
+      fieldsCustom: ['no', 'challenge'],
+      fieldsCustomOnly: true,
+      firstObjOnly: true,
+      whereCustomQuery,
+      whereCustomParams,
+    }) as Promise<any | null>;
   }
 }
