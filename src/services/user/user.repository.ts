@@ -12,7 +12,7 @@ export class UserViewRepository extends BaseRepository<UserViewEntity> {
       'vw_users',
       ['user_no'],
       false,
-      ['id', 'status', 'name', 'email'],
+      ['id', 'role', 'company_no', 'status', 'name', 'email'],
       ['created_at', 'updated_at'],
       [], // on duplicate update field
       [], // soft delete field
@@ -24,6 +24,10 @@ export class UserViewRepository extends BaseRepository<UserViewEntity> {
   async findByEmail(conn: PoolConnection, email: string): Promise<UserViewEntity | null> {
     return this.helper.select(conn, { email }, { firstObjOnly: true }) as Promise<UserViewEntity | null>;
   }
+
+  async findAllByCompany(conn: PoolConnection, company_no?: number): Promise<UserViewEntity[]> {
+    return this.helper.select(conn, { company_no });
+  }
 }
 
 @Injectable() // Provider 등록 가능
@@ -33,7 +37,7 @@ export class UserRepository extends BaseRepository<UserEntity> {
       'users',
       ['no'],
       true,
-      ['id', 'status'],
+      ['id', 'role_no', 'company_no', 'status'],
       ['created_at', 'updated_at', 'deleted_at'],
       [], // on duplicate update field
       ['deleted_at', 'now()'], // soft delete field
@@ -43,7 +47,15 @@ export class UserRepository extends BaseRepository<UserEntity> {
 
   // 필요시 커스텀 쿼리 추가 가능
   async findById(conn: PoolConnection, id: string): Promise<UserEntity | null> {
-    return this.helper.select(conn, { id }, { firstObjOnly: true }) as Promise<UserEntity | null>;
+    const fieldsCustom = [
+      '(SELECT name FROM roles WHERE no=users.role_no) as role'
+    ];
+    return this.helper.select(conn, {
+      id,
+    }, {
+      firstObjOnly: true,
+      fieldsCustom,
+    }) as Promise<UserEntity | null>;
   }
 }
 

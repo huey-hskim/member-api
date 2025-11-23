@@ -19,6 +19,9 @@ export class UserViewEntity {
   @ApiProperty({example: 'test@example.com', description: '이메일'})
   email!: string;
 
+  @ApiProperty({ example: 'user', description: '역할 이름' })
+  role?: string;
+
   @ApiProperty({ example: '2025-09-06T12:00:00.000Z', description: '생성일' })
   created_at?: Date | null;
 
@@ -35,6 +38,15 @@ export class UserEntity {
 
   @ApiProperty({ example: '홍길동', description: '로그인아이디(이메일)' })
   id!: string;
+
+  @ApiProperty({ example: 'user', description: '역할 이름' })
+  role?: string;
+
+  @ApiProperty({ example: '5', description: 'roles.no' })
+  role_no?: string;
+
+  @ApiProperty({ example: null, required: false, description: '회사번호. companies.no' })
+  company_no?: number;
 
   @ApiProperty({ example: 200, description: '상태. 100:대기, 200:정상.' })
   status!: number;

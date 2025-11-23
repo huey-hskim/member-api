@@ -1,6 +1,6 @@
 // auth.util.ts
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
 import { createHash, randomBytes } from 'crypto';
 
@@ -40,11 +40,20 @@ export class AuthUtil {
       .digest('hex');
   }
 
-  makeAccessToken(payload: Partial<{ user_no: string | number, id: string, hash: string, ttl: string | number }>): string | null {
+  makeAccessToken(payload: Partial<{
+    user_no: string | number,
+    hash: string,
+    id: string,
+    role: string,
+    company_no: number,
+    ttl: string | number,
+  }>): string | null {
     let {
       user_no,
       hash,
       id,
+      role,
+      company_no,
       ttl,
     } = payload;
 
@@ -56,15 +65,17 @@ export class AuthUtil {
       user_no,
       hash,
       id,
+      role,
+      company_no,
     };
 
     const secret = ACCESS_TOKEN_SECRET;
     const expiresIn = Number.isInteger(Number(ttl)) ? Number(ttl) : ttl || ACCESS_TOKEN_TTL;
 
-    return this.jwtService.sign(data, {
+    return this.jwtService.sign(data as any, {
       secret,
       expiresIn,
-    });
+    } as JwtSignOptions);
   }
 
   makeRefreshToken(payload: Partial<{ hash: string, ttl: string | number }>): string | null {
@@ -84,10 +95,10 @@ export class AuthUtil {
     const secret = REFRESH_TOKEN_SECRET;
     const expiresIn = Number.isInteger(Number(ttl)) ? Number(ttl) : ttl || REFRESH_TOKEN_TTL;
 
-    return this.jwtService.sign(data, {
+    return this.jwtService.sign(data as any, {
       secret,
       expiresIn,
-    });
+    } as JwtSignOptions);
   }
 
   verifyAccessToken(token: string): PayloadInAccessToken | null {

@@ -1,6 +1,6 @@
 // base.controller.ts
 
-import { Body, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Delete, Get, Param, Post, Put, UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BaseSelectResDto, BaseInsertResDto, BaseUpdateResDto, BaseDeleteResDto } from './base.dto';
@@ -21,7 +21,7 @@ export abstract class BaseController<
   @Get()
   @ApiOperation({ summary: '전체 조회' })
   @ApiResponse({ status: 200, description: '성공', type: BaseSelectResDto<T> })
-  async findAll(): Promise<T[]> {
+  async findAll(@Req() req: any): Promise<T[]> {
     return this.service.findAll();
   }
 

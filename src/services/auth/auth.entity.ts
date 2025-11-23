@@ -8,6 +8,7 @@ export class PayloadInAccessToken {
   id?: string;
   company_no?: string;
   roles: string = '||';
+  role?: string;
 
   constructor(t: {
     user_no: number;
@@ -15,6 +16,7 @@ export class PayloadInAccessToken {
     id?: string;
     company_no?: number;
     roles?: string | string[];
+    role?: string;
   }) {
     const {
       user_no,
@@ -22,12 +24,14 @@ export class PayloadInAccessToken {
       id,
       company_no,
       roles,
+      role,
     } = t;
 
     this.user_no = `${user_no}`;
     this.hash = hash;
     if (id) this.id = id;
     if (company_no) this.company_no = `${company_no}`;
+    if (role) this.role = `${role}`;
     if (roles) {
       if (roles instanceof Array) {
         this.roles = '|' + roles.join('|') + '|';

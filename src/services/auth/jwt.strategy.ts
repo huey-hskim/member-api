@@ -22,13 +22,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       user_no,
       hash,
       id,
+      roles,
+      role,
+      company_no,
     } = payload;
 
     if (!user_no || !hash) {
       return null;
     }
 
-    return { user_no, hash, id };
+    return { user_no, hash, id, roles, role, company_no };
   }
 }
 

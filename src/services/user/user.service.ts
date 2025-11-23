@@ -31,6 +31,15 @@ export class UserService extends BaseService<UserViewEntity, UserViewRepository>
   //   }
   // }
 
+  async findAllByCompany(company_no?: number) {
+    const conn = await this.pool.getConnection();
+    try {
+      return await this.userViewRepository.findAllByCompany(conn, company_no);
+    } finally {
+      conn.release();
+    }
+  }
+
   async createUser(dto: CreateUserDto) {
     const conn = await this.pool.getConnection();
 

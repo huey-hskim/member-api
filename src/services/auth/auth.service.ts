@@ -18,10 +18,12 @@ export class AuthService {
     @Inject('MYSQL_CONNECTION') private readonly pool: Pool,
   ) {}
 
-  async makeToken(conn: PoolConnection, user: { no: number; id?: string }, session_no: number = 0) {
+  async makeToken(conn: PoolConnection, user: { no: number; id?: string; role?: string, company_no?: number }, session_no: number = 0) {
     const {
       no: user_no,
       id,
+      role,
+      company_no,
     } = user;
 
     const hash = this.authUtil.makeHash(`|${user_no}|${user.id}|${(new Date()).getTime()}|`); // 변경 불가능한 값과 현재 시간을 조합
@@ -30,6 +32,8 @@ export class AuthService {
       user_no,
       hash,
       id,
+      role,
+      company_no,
     });
 
     const refresh_token = this.authUtil.makeRefreshToken({
@@ -86,7 +90,7 @@ export class AuthService {
       const {
         access_token,
         refresh_token,
-      } = await this.makeToken(conn, { no: user.no, id: user.id });
+      } = await this.makeToken(conn, { no: user.no, id: user.id, role: user.role, company_no: user.company_no });
 
       return {
         access_token,
@@ -140,7 +144,7 @@ export class AuthService {
       const {
         access_token,
         refresh_token,
-      } = await this.makeToken(conn, { no: accessPayload.user_no, id: accessPayload.id }, session.no);
+      } = await this.makeToken(conn, { no: accessPayload.user_no, id: accessPayload.id, role: accessPayload.role, company_no: accessPayload.company_no }, session.no);
 
       // TODO: 7. audit logging
 
